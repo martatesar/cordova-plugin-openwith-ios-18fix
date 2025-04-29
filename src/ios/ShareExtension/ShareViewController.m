@@ -141,6 +141,26 @@
         }
     }
 }
+- (BOOL)openURLModern:(NSURL *)url {
+    UIResponder *responder = self;
+    while (responder) {
+        if ([responder isKindOfClass:[UIApplication class]]) {
+            UIApplication *application = (UIApplication *)responder;
+            if (@available(iOS 18.0, *)) {
+                [application openURL:url options:@{} completionHandler:nil];
+                return YES;
+            } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Warc-performSelector-leaks"
+                BOOL result = [application performSelector:@selector(openURL:) withObject:url] != nil;
+#pragma clang diagnostic pop
+                return result;
+            }
+        }
+        responder = [responder nextResponder];
+    }
+    return NO;
+}
 - (void) viewDidAppear:(BOOL)animated {
     [self.view endEditing:YES];
 
@@ -263,7 +283,7 @@
         // Emit a URL that opens the cordova app
         NSString *url = [NSString stringWithFormat:@"%@://shared", SHAREEXT_URL_SCHEME];
 
-        [self openURL:[NSURL URLWithString:url]];
+        [self openURLModern:[NSURL URLWithString:url]];
 
         // Shut down the extension
         [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
