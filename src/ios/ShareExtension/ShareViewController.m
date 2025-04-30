@@ -123,25 +123,7 @@
     return YES;
 }
 
-- (void) openURL:(nonnull NSURL *)url {
-    SEL selector = NSSelectorFromString(@"openURL:");
-    UIResponder* responder = self;
-    while ((responder = [responder nextResponder]) != nil) {
-        NSLog(@"responder = %@", responder);
-        if([responder respondsToSelector:selector] == true) {
-            NSMethodSignature *methodSignature = [responder methodSignatureForSelector:selector];
-            NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSignature];
-
-            [invocation setTarget: responder];
-            [invocation setSelector: selector];
-            [invocation setArgument: &url atIndex: 2];
-
-            [invocation invoke];
-            break;
-        }
-    }
-}
-- (BOOL)openURLModern:(NSURL *)url {
+- (BOOL)openURL:(NSURL *)url {
     UIResponder *responder = self;
     while (responder) {
         if ([responder isKindOfClass:[UIApplication class]]) {
@@ -283,7 +265,7 @@
         // Emit a URL that opens the cordova app
         NSString *url = [NSString stringWithFormat:@"%@://shared", SHAREEXT_URL_SCHEME];
 
-        [self openURLModern:[NSURL URLWithString:url]];
+        [self openURL:[NSURL URLWithString:url]];
 
         // Shut down the extension
         [self.extensionContext completeRequestReturningItems:@[] completionHandler:nil];
